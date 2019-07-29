@@ -1,5 +1,9 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+  table
+    each item in posts
+      tr
+        td= item.postId
+        td
+          img(src=item.picture width="100")
