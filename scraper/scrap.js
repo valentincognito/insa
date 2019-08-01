@@ -9,7 +9,7 @@ const SELECTOR = '.v1Nh3.kIKUG'
 scrap(URL, SELECTOR)
 
 async function scrap(URL, SELECTOR){
-  const browser = await puppeteer.launch({headless: true})
+  const browser = await puppeteer.launch({headless: false})
   const page = await browser.newPage()
   await page.setViewport({
     width: 320,

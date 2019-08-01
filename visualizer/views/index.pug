@@ -4,6 +4,10 @@ block content
   table
     each item in posts
       tr
-        td= item.postId
+        td= item.date
+        td= item.user
         td
-          img(src=item.picture width="100")
+          img(src=item.picture width="40")
+        td
+          each tag in item.tags
+            span ##{tag.name}

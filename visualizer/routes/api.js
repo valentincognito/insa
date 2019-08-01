@@ -2,15 +2,54 @@ const express = require('express')
 const router = express.Router()
 const Post = require('../models/post')
 
-router.post('/add_post', function(req, res, next) {
-  let post = new Post()
-  post.postId = req.body.postId
-  post.picture = req.body.picture
-  post.save(err => {
+router.get('/get_posts', function(req, res, next) {
+  Post.find(function(err, posts){
     if (err)
       res.json({status: 'error', err: err})
     else
-      res.json({status: 'success', post: post})
+      res.json({status: 'success', posts: posts})
+  })
+})
+
+router.post('/add_post', function(req, res, next) {
+  Post.find({postId: req.body.postId}, function(err, posts){
+    if (posts.length == 0) {
+      let post = new Post()
+      post.postId = req.body.postId
+      post.picture = req.body.picture
+      post.save(err => {
+        if (err)
+          res.json({status: 'error', err: err})
+        else
+          res.json({status: 'success', post: post})
+      })
+    }else{
+      res.json({status: 'error', err: 'existing post'})
+    }
+  })
+})
+
+router.put('/update_post', function(req, res, next) {
+  Post.findById(req.body.postId, function (err, post) {
+    if (post.tags.length <= 0) {
+      if (req.body.hashtags != undefined) {
+        for (hashtag of req.body.hashtags){
+          if (hashtag != undefined) {
+            post.tags.push({
+              name: hashtag
+            })
+          }
+        }
+      }
+    }
+    post.user = req.body.user
+    post.date = req.body.date
+    post.save(err => {
+      if (err)
+        res.json({status: 'error', err: err})
+      else
+        res.json({status: 'success', post: post})
+    })
   })
 })
 
