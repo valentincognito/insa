@@ -9,8 +9,7 @@ const PostSchema = new mongoose.Schema({
   tags: [{
     name: String
   }],
-  created: Date,
-  modified: Date
+  date: Date
 })
 
 const Post = mongoose.model('Post', PostSchema)
