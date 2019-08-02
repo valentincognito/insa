@@ -1,8 +1,42 @@
-body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+@import url('https://fonts.googleapis.com/css?family=Libre+Baskerville|Open+Sans:400,700');
+
+*,
+*:after,
+*:before {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+html{height: 100%;font-family: 'Open Sans', sans-serif;font-size: 14px;font-weight: 400;word-break: keep-all;}
+body{margin: 0px;color: #000;background-color: #fff;}
+
+a {background-color: transparent;text-decoration: none;color: inherit;display: block;opacity: 1;transition: all 0.2s ease-in-out;}
+a:active,
+a:hover{outline: 0;text-decoration: none;color: inherit;}
+
+/** helpers **/
+.show{display: block;}
+.hidden{display: none !important;}
+.pull-left{float: left;}
+.pull-right{float: right;}
+.text-left{text-align: left;}
+.text-right{text-align: right;}
+.text-center{text-align: center;}
+.block{display: block;}
+.inline-block{display: inline-block;}
+.clearfix:before,
+.clearfix:after {content: "";display: table;}
+.clearfix:after {clear: both;}
+.clearfix {zoom: 1; /* ie 6/7 */}
+/* helpers end  */
+
+/** common **/
+.content{
+  position: relative;
+  margin: 0 auto;
+  padding: 40px;
 }
 
-a {
-  color: #00B7FF;
+.posts-list{
+  font-size: 12px;
 }

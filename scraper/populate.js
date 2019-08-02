@@ -11,27 +11,29 @@ async function populatePostsInfo(){
   let posts = await getPosts()
 
   for (post of posts) {
-    const browser = await puppeteer.launch({headless: true})
-    const page = await browser.newPage()
-    await page.goto('https://www.instagram.com/p/'+post.postId, {waitUntil: 'load'})
-    //await page.waitForSelector(SELECTOR)
+    if (post.user == undefined) {
+      const browser = await puppeteer.launch({headless: true})
+      const page = await browser.newPage()
+      await page.goto('https://www.instagram.com/p/'+post.postId, {waitUntil: 'load'})
+      //await page.waitForSelector(SELECTOR)
 
-    const html = await page.content()
-    const $ = cheerio.load(html)
+      const html = await page.content()
+      const $ = cheerio.load(html)
 
-    let hashtags = []
-    let user = $('.FPmhX.nJAzx').attr('title')
-    let postDate = $('._1o9PC.Nzb55').attr('datetime')
+      let hashtags = []
+      let user = $('.FPmhX.nJAzx').attr('title')
+      let postDate = $('._1o9PC.Nzb55').attr('datetime')
 
-    $('.ltEKP a[href*="explore/tags"]').each(function() {
-      let hashtagUrl = $(this).attr('href')
-      let hashtag = hashtagUrl.substr(14, hashtagUrl.length).slice(0, -1)
-      hashtags.push(hashtag)
-    })
+      $('.ltEKP a[href*="explore/tags"]').each(function() {
+        let hashtagUrl = $(this).attr('href')
+        let hashtag = hashtagUrl.substr(14, hashtagUrl.length).slice(0, -1)
+        hashtags.push(hashtag)
+      })
 
-    await updatePost(post._id, user, hashtags, postDate)
+      await updatePost(post._id, user, hashtags, postDate)
 
-    browser.close()
+      browser.close()
+    }
   }
 }
 
@@ -68,6 +70,7 @@ async function updatePost(id, user, hashtags, date){
       else{
         let response = JSON.parse(body)
         if (response.status == "success") {
+          console.log(`${response.post.postId} updated!`)
           resolve()
         }else{
           reject()

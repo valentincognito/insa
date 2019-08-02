@@ -1,13 +1,17 @@
 extends layout
 
 block content
-  table
+  table.posts-list
     each item in posts
       tr
-        td= item.date
+        td= item.postId
+        - let month = item.date.getMonth() + 1
+        td= month.toString().padStart(2, '0') + "/" + item.date.getDate().toString().padStart(2, '0') + "/" + item.date.getFullYear()
+        td= item.date.getHours().toString().padStart(2, '0') + ":" + item.date.getMinutes().toString().padStart(2, '0') + ":" + item.date.getSeconds().toString().padStart(2, '0')
         td= item.user
         td
-          img(src=item.picture width="40")
+          a(href="https://www.instagram.com/p/"+item.postId target="_blank")
+            img(src=item.picture width="20")
         td
           each tag in item.tags
             span ##{tag.name}

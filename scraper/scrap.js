@@ -74,7 +74,7 @@ async function savePosts(page){
         else{
           let response = JSON.parse(body)
           if (response.status == "success") {
-            console.log('new post saved !')
+            console.log('new post saved!')
           }
         }
       })
