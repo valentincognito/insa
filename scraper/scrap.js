@@ -2,8 +2,18 @@ const cheerio = require('cheerio')
 const puppeteer = require('puppeteer')
 const request = require('request')
 
+const MAIN_TAGS = [
+  '맛집',
+  '술집',
+  '맛스타그램',
+  '고기스타그램',
+  '주말스타그램',
+  '불금',
+  '칵테일'
+]
+
 const INSA_API_URL = 'http://localhost:3535/api'
-const URL = encodeURI('https://www.instagram.com/explore/tags/'+process.argv[2])
+const URL = encodeURI('https://www.instagram.com/explore/tags/'+ MAIN_TAGS[process.argv[2]])
 const SELECTOR = '.v1Nh3.kIKUG'
 
 let NEW_POST_COUNT = 0
@@ -13,7 +23,7 @@ let SIMILARITY_COUNT = 0
 scrap(URL, SELECTOR)
 
 async function scrap(URL, SELECTOR){
-  const browser = await puppeteer.launch({headless: true})
+  const browser = await puppeteer.launch({headless: false})
   const page = await browser.newPage()
   await page.setViewport({
     width: 320,
