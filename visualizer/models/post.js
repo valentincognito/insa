@@ -10,6 +10,7 @@ const PostSchema = new mongoose.Schema({
   tags: [{
     name: String
   }],
+  locationTag: {type: mongoose.Schema.Types.ObjectId, ref: 'Tag'},
   date: Date
 })
 

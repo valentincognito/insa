@@ -3,13 +3,17 @@ const puppeteer = require('puppeteer')
 const request = require('request')
 
 const INSA_API_URL = 'http://localhost:3535/api'
-const URL = encodeURI('https://www.instagram.com/explore/tags/맛집')
+const URL = encodeURI('https://www.instagram.com/explore/tags/'+process.argv[2])
 const SELECTOR = '.v1Nh3.kIKUG'
+
+let NEW_POST_COUNT = 0
+let LAST_POST_COUNT = 0
+let SIMILARITY_COUNT = 0
 
 scrap(URL, SELECTOR)
 
 async function scrap(URL, SELECTOR){
-  const browser = await puppeteer.launch({headless: false})
+  const browser = await puppeteer.launch({headless: true})
   const page = await browser.newPage()
   await page.setViewport({
     width: 320,
@@ -38,8 +42,19 @@ async function scrap(URL, SELECTOR){
     await wait(1500)
     await savePosts(page)
     viewportIncr = viewportIncr + viewportHeight
+
     let percentComplete = viewportIncr * 100 / viewportTarget
     console.log(`${percentComplete}% completed`)
+
+    if (NEW_POST_COUNT == LAST_POST_COUNT) {
+      SIMILARITY_COUNT++
+      if (SIMILARITY_COUNT >= 10) {
+        break
+      }
+    }else{
+      SIMILARITY_COUNT = 0
+    }
+    LAST_POST_COUNT = NEW_POST_COUNT
   }
 
   browser.close()
@@ -74,6 +89,7 @@ async function savePosts(page){
         else{
           let response = JSON.parse(body)
           if (response.status == "success") {
+            NEW_POST_COUNT++
             console.log('new post saved!')
           }
         }

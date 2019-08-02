@@ -3,8 +3,8 @@ const router = express.Router()
 const Post = require('../models/post')
 const Tag = require('../models/tag')
 
-router.get('/get_posts', function(req, res, next) {
-  Post.find(function(err, posts){
+router.post('/get_posts', function(req, res, next) {
+  Post.find(req.body.params, function(err, posts){
     if (err)
       res.json({status: 'error', err: err})
     else
@@ -54,6 +54,27 @@ router.put('/update_post', function(req, res, next) {
   })
 })
 
+router.put('/update_post_location', function(req, res, next) {
+  Post.findById(req.body.postId, function (err, post) {
+    post.locationTag = req.body.tag
+    post.save(err => {
+      if (err)
+        res.json({status: 'error', err: err})
+      else
+        res.json({status: 'success', post: post})
+    })
+  })
+})
+
+router.post('/get_tag', function(req, res, next) {
+  Tag.findOne(req.body.params, function(err, tag){
+    if (err)
+      res.json({status: 'error', err: err})
+    else
+      res.json({status: 'success', tag: tag})
+  })
+})
+
 router.post('/add_tag', function(req, res, next) {
   Tag.find({name: req.body.name}, function(err, tags){
     if (tags.length == 0) {
@@ -69,6 +90,21 @@ router.post('/add_tag', function(req, res, next) {
     }else{
       res.json({status: 'error', err: 'existing tag'})
     }
+  })
+})
+
+router.post('/subway_station', function(req, res, next) {
+  Tag.find({
+    isLocation: { $eq: false }
+  }, function(err, tags){
+    for (tag of tags) {
+      if (tag.name.match(/역$/gm)) {
+        console.log(tag.name)
+        // tag.isLocation = true
+        // tag.save()
+      }
+    }
+    res.send('done')
   })
 })
 

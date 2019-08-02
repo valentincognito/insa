@@ -20,7 +20,12 @@ async function discoverTags(){
 
 async function getPosts(){
   return new Promise(async (resolve, reject) => {
-    request.get({url: INSA_API_URL+'/get_posts'}, function(err, httpResponse, body){
+    let form = {
+      params: {
+        tags: { $ne: [] }
+      }
+    }
+    request.post({url: INSA_API_URL+'/get_posts', form: form}, function(err, httpResponse, body){
       if(err){
         console.log(err)
       }

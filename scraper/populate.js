@@ -39,7 +39,12 @@ async function populatePostsInfo(){
 
 async function getPosts(){
   return new Promise(async (resolve, reject) => {
-    request.get({url: INSA_API_URL+'/get_posts'}, function(err, httpResponse, body){
+    let form = {
+      params: {
+        user: { $exists: false }
+      }
+    }
+    request.post({url: INSA_API_URL+'/get_posts', form: form}, function(err, httpResponse, body){
       if(err){
         console.log(err)
       }
