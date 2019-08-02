@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const Post = require('../models/post')
+const Tag = require('../models/tag')
 
 router.get('/get_posts', function(req, res, next) {
   Post.find(function(err, posts){
@@ -50,6 +51,24 @@ router.put('/update_post', function(req, res, next) {
       else
         res.json({status: 'success', post: post})
     })
+  })
+})
+
+router.post('/add_tag', function(req, res, next) {
+  Tag.find({name: req.body.name}, function(err, tags){
+    if (tags.length == 0) {
+      let tag = new Tag()
+      tag.name = req.body.name
+      tag.isLocation = false
+      tag.save(err => {
+        if (err)
+          res.json({status: 'error', err: err})
+        else
+          res.json({status: 'success', tag: tag})
+      })
+    }else{
+      res.json({status: 'error', err: 'existing tag'})
+    }
   })
 })
 
