@@ -23,7 +23,7 @@ let SIMILARITY_COUNT = 0
 scrap(URL, SELECTOR)
 
 async function scrap(URL, SELECTOR){
-  const browser = await puppeteer.launch({headless: false})
+  const browser = await puppeteer.launch({headless: true})
   const page = await browser.newPage()
   await page.setViewport({
     width: 320,
