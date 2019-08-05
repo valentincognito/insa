@@ -54,7 +54,7 @@ async function scrap(URL, SELECTOR){
   console.log(`height: ${height}, viewportHeight: ${viewportHeight} `)
 
   let viewportIncr = 0
-  let viewportTarget = viewportHeight * 2
+  let viewportTarget = viewportHeight * 5000000000000
   while (viewportIncr + viewportHeight < viewportTarget) {
     await page.evaluate(_viewportHeight => {
       window.scrollBy(0, _viewportHeight)
