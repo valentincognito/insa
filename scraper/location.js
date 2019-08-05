@@ -1,8 +1,8 @@
+require('dotenv').config()
+
 const cheerio = require('cheerio')
 const puppeteer = require('puppeteer')
 const request = require('request')
-
-const INSA_API_URL = 'http://localhost:3535/api'
 
 inferLocation()
 
@@ -30,7 +30,7 @@ async function getPosts(){
         locationTag: { $exists: false },
       }
     }
-    request.post({url: INSA_API_URL+'/get_posts', form: form}, function(err, httpResponse, body){
+    request.post({url: process.env.API_URL+'/get_posts', form: form}, function(err, httpResponse, body){
       if(err){
         console.log(err)
       }
@@ -53,7 +53,7 @@ async function getTag(name){
         name: name,
       }
     }
-    request.post({url: INSA_API_URL+'/get_tag', form: form}, function(err, httpResponse, body){
+    request.post({url: process.env.API_URL+'/get_tag', form: form}, function(err, httpResponse, body){
       if(err){
         console.log(err)
       }
@@ -76,7 +76,7 @@ async function addPostLocation(postId, tag){
       tag: tag
     }
     console.log(form)
-    request.put({url: INSA_API_URL+'/update_post_location', form: form}, function(err, httpResponse, body){
+    request.put({url: process.env.API_URL+'/update_post_location', form: form}, function(err, httpResponse, body){
       if(err){
         console.log(err)
       }

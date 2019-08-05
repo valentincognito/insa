@@ -1,8 +1,8 @@
+require('dotenv').config()
+
 const cheerio = require('cheerio')
 const puppeteer = require('puppeteer')
 const request = require('request')
-
-const INSA_API_URL = 'http://localhost:3535/api'
 
 discoverTags()
 
@@ -25,7 +25,7 @@ async function getPosts(){
         tags: { $ne: [] }
       }
     }
-    request.post({url: INSA_API_URL+'/get_posts', form: form}, function(err, httpResponse, body){
+    request.post({url: process.env.API_URL+'/get_posts', form: form}, function(err, httpResponse, body){
       if(err){
         console.log(err)
       }
@@ -46,7 +46,7 @@ async function addTag(tag){
     let form = {
       name: tag
     }
-    request.post({url: INSA_API_URL+'/add_tag', form: form}, function(err, httpResponse, body){
+    request.post({url: process.env.API_URL+'/add_tag', form: form}, function(err, httpResponse, body){
       if(err){
         console.log(err)
       }

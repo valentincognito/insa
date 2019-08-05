@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 const cheerio = require('cheerio')
 const puppeteer = require('puppeteer')
 const request = require('request')
@@ -11,7 +13,6 @@ const MAIN_TAGS = [
   '불금',
   '칵테일'
 ]
-const INSA_API_URL = 'http://localhost:3535/api'
 const SELECTOR = '.v1Nh3.kIKUG'
 
 let NEW_POST_COUNT = 0
@@ -152,7 +153,7 @@ async function getPosts(params){
     let form = {
       params: params
     }
-    request.post({url: INSA_API_URL+'/get_posts', form: form}, function(err, httpResponse, body){
+    request.post({url: process.env.API_URL+'/get_posts', form: form}, function(err, httpResponse, body){
       if(err){
         console.log(err)
       }
@@ -190,7 +191,7 @@ async function savePosts(page){
         postId: post.postId,
         picture: post.picture
       }
-      request.post({url: INSA_API_URL+'/add_post', form: form}, function(err, httpResponse, body){
+      request.post({url: process.env.API_URL+'/add_post', form: form}, function(err, httpResponse, body){
         if(err){
           console.log(err)
         }
@@ -216,7 +217,7 @@ async function updatePost(id, user, hashtags, date){
       hashtags: hashtags,
       date: date
     }
-    request.put({url: INSA_API_URL+'/update_post', form: form}, function(err, httpResponse, body){
+    request.put({url: process.env.API_URL+'/update_post', form: form}, function(err, httpResponse, body){
       if(err){
         console.log(err)
       }
@@ -239,7 +240,7 @@ async function addTag(tag){
     let form = {
       name: tag
     }
-    request.post({url: INSA_API_URL+'/add_tag', form: form}, function(err, httpResponse, body){
+    request.post({url: process.env.API_URL+'/add_tag', form: form}, function(err, httpResponse, body){
       if(err){
         console.log(err)
       }
@@ -263,7 +264,7 @@ async function getTag(name){
         name: name,
       }
     }
-    request.post({url: INSA_API_URL+'/get_tag', form: form}, function(err, httpResponse, body){
+    request.post({url: process.env.API_URL+'/get_tag', form: form}, function(err, httpResponse, body){
       if(err){
         console.log(err)
       }
@@ -286,7 +287,7 @@ async function addPostLocation(postId, tag){
       tag: tag
     }
     console.log(form)
-    request.put({url: INSA_API_URL+'/update_post_location', form: form}, function(err, httpResponse, body){
+    request.put({url: process.env.API_URL+'/update_post_location', form: form}, function(err, httpResponse, body){
       if(err){
         console.log(err)
       }

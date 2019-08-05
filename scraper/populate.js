@@ -1,9 +1,8 @@
+require('dotenv').config()
+
 const cheerio = require('cheerio')
 const puppeteer = require('puppeteer')
 const request = require('request')
-
-const INSA_API_URL = 'http://localhost:3535/api'
-//const SELECTOR = '.v1Nh3.kIKUG'
 
 populatePostsInfo()
 
@@ -44,7 +43,7 @@ async function getPosts(){
         user: { $exists: false }
       }
     }
-    request.post({url: INSA_API_URL+'/get_posts', form: form}, function(err, httpResponse, body){
+    request.post({url: process.env.API_URL+'/get_posts', form: form}, function(err, httpResponse, body){
       if(err){
         console.log(err)
       }
@@ -68,7 +67,7 @@ async function updatePost(id, user, hashtags, date){
       hashtags: hashtags,
       date: date
     }
-    request.put({url: INSA_API_URL+'/update_post', form: form}, function(err, httpResponse, body){
+    request.put({url: process.env.API_URL+'/update_post', form: form}, function(err, httpResponse, body){
       if(err){
         console.log(err)
       }
