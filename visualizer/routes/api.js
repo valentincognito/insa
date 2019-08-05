@@ -100,8 +100,8 @@ router.post('/subway_station', function(req, res, next) {
     for (tag of tags) {
       if (tag.name.match(/역$/gm)) {
         console.log(tag.name)
-        // tag.isLocation = true
-        // tag.save()
+        tag.isLocation = true
+        tag.save()
       }
     }
     res.send('done')
