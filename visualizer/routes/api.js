@@ -3,6 +3,15 @@ const router = express.Router()
 const Post = require('../models/post')
 const Tag = require('../models/tag')
 
+router.post('/get_post', function(req, res, next) {
+  Post.findOne(req.body.params, function(err, post){
+    if (err)
+      res.json({status: 'error', err: err})
+    else
+      res.json({status: 'success', post: post})
+  })
+})
+
 router.post('/get_posts', function(req, res, next) {
   Post.find(req.body.params, function(err, posts){
     if (err)
@@ -18,6 +27,19 @@ router.post('/add_post', function(req, res, next) {
       let post = new Post()
       post.postId = req.body.postId
       post.picture = req.body.picture
+      post.user = req.body.user
+      post.date = req.body.date
+      if (post.hashtags.length <= 0) {
+        if (req.body.hashtags != undefined) {
+          for (hashtag of req.body.hashtags){
+            if (hashtag != undefined) {
+              post.hashtags.push({
+                name: hashtag
+              })
+            }
+          }
+        }
+      }
       post.save(err => {
         if (err)
           res.json({status: 'error', err: err})
@@ -98,7 +120,7 @@ router.post('/subway_station', function(req, res, next) {
     isLocation: { $eq: false }
   }, function(err, tags){
     for (tag of tags) {
-      if (tag.name.match(/역$/gm)) {
+      if (tag.name.match(/동$/gm)) {
         console.log(tag.name)
         tag.isLocation = true
         tag.save()

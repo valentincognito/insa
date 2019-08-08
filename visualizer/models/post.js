@@ -7,7 +7,7 @@ const PostSchema = new mongoose.Schema({
   },
   user: String,
   picture: String,
-  tags: [{
+  hashtags: [{
     name: String
   }],
   locationTag: {type: mongoose.Schema.Types.ObjectId, ref: 'Tag'},
