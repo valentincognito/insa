@@ -1,18 +1,33 @@
 extends layout
 
 block content
-  table.posts-list
-    each item in posts
-      tr
-        td= item.postId
-        - let month = item.date.getMonth() + 1
-        td= month.toString().padStart(2, '0') + "/" + item.date.getDate().toString().padStart(2, '0') + "/" + item.date.getFullYear()
-        td= item.date.getHours().toString().padStart(2, '0') + ":" + item.date.getMinutes().toString().padStart(2, '0') + ":" + item.date.getSeconds().toString().padStart(2, '0')
-        td= item.user
-        td
-          a(href="https://www.instagram.com/p/"+item.postId target="_blank")
-            img(src=item.picture width="20")
-        td= item.station.name
-        td
-          each tag in item.hashtags
-            span ##{tag.name}
+  div.content
+    table.posts-list
+      thead
+        tr
+          th id
+          th date
+          th time
+          th user
+          th picture
+          th location
+          th lat
+          th long
+      each item in posts
+        tr
+          td= item.postId
+          - let month = item.date.getMonth() + 1
+          td= month.toString().padStart(2, '0') + "/" + item.date.getDate().toString().padStart(2, '0') + "/" + item.date.getFullYear()
+          td= item.date.getHours().toString().padStart(2, '0') + ":" + item.date.getMinutes().toString().padStart(2, '0') + ":" + item.date.getSeconds().toString().padStart(2, '0')
+          td= item.user
+          td
+            a(href="https://www.instagram.com/p/"+item.postId target="_blank")
+              img(src=item.picture width="30")
+          td= item.station.name
+          td= item.station.lat
+          td= item.station.long
+          //- td
+          //-   each tag in item.hashtags
+          //-     span ##{tag.name}
+block scripts
+  script(src='/js/index.js')

@@ -38,5 +38,9 @@ a:hover{outline: 0;text-decoration: none;color: inherit;}
 }
 
 .posts-list{
+  width: 100%;
   font-size: 12px;
+}
+.posts-list th{
+  text-align: left;
 }
