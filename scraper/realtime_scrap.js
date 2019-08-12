@@ -30,9 +30,17 @@ async function discoverNewPosts(){
   if(process.env.LOG == '1') console.log(chalk.yellow(`scraping initialization...`))
   console.time('scraping time')
 
+  //get all subway stations info
+  let getStationResponse = await api.getStations().catch((err) =>{
+    if (err) {
+      console.log(`the API server seems to be offline`)
+      discoverNewPosts()
+    }
+  })
+
   const cluster = await Cluster.launch({
-      concurrency: Cluster.CONCURRENCY_CONTEXT,
-      maxConcurrency: 10,
+    concurrency: Cluster.CONCURRENCY_CONTEXT,
+    maxConcurrency: 10,
   })
 
   const extractInfo = async ({ page, data: id }) => {
@@ -48,6 +56,7 @@ async function discoverNewPosts(){
     let user = $(SELECTOR.user).attr('title')
     let date = $(SELECTOR.date).attr('datetime')
     let picture = $(SELECTOR.picture).attr('src')
+    let stationId
 
     //if the picture is not found it's a video case
     if (picture == undefined)
@@ -57,6 +66,13 @@ async function discoverNewPosts(){
       let hashtagUrl = $(this).attr('href')
       let hashtag = hashtagUrl.substr(14, hashtagUrl.length).slice(0, -1)
       hashtags.push(hashtag)
+
+      let search = (hashtag == "서울역") ? hashtag : hashtag.replace(/역$/gm, '') //remove the 역 keyword for the matching
+      let found = getStationResponse.stations.find(el => el.name === search)
+      if (found) {
+        if(process.env.LOG == '1') console.log(chalk.cyan(`station info found for ${chalk.cyanBright(id)}`))
+        stationId = found._id
+      }
     })
 
     api.createPost({
@@ -64,7 +80,8 @@ async function discoverNewPosts(){
       user: user,
       date: date,
       picture: picture,
-      hashtags: hashtags
+      hashtags: hashtags,
+      station: stationId
     })
 
     if(process.env.LOG == '1') console.log(chalk.green(`post ${chalk.greenBright(id)} saved`))

@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const Post = require('../models/post')
 const Tag = require('../models/tag')
+const Station = require('../models/station')
 
 router.post('/get_post', function(req, res, next) {
   Post.findOne(req.body.params, function(err, post){
@@ -28,6 +29,7 @@ router.post('/add_post', function(req, res, next) {
       post.postId = req.body.postId
       post.picture = req.body.picture
       post.user = req.body.user
+      post.station = req.body.station
       post.date = req.body.date
       if (post.hashtags.length <= 0) {
         if (req.body.hashtags != undefined) {
@@ -115,19 +117,28 @@ router.post('/add_tag', function(req, res, next) {
   })
 })
 
-router.post('/subway_station', function(req, res, next) {
-  Tag.find({
-    isLocation: { $eq: false }
-  }, function(err, tags){
-    for (tag of tags) {
-      if (tag.name.match(/동$/gm)) {
-        console.log(tag.name)
-        tag.isLocation = true
-        tag.save()
-      }
-    }
-    res.send('done')
+router.get('/get_stations', function(req, res, next) {
+  Station.find(function(err, stations){
+    if (err)
+      res.json({status: 'error', err: err})
+    else
+      res.json({status: 'success', stations: stations})
   })
 })
+
+// router.post('/subway_station', function(req, res, next) {
+//   Tag.find({
+//     isLocation: { $eq: false }
+//   }, function(err, tags){
+//     for (tag of tags) {
+//       if (tag.name.match(/동$/gm)) {
+//         console.log(tag.name)
+//         tag.isLocation = true
+//         tag.save()
+//       }
+//     }
+//     res.send('done')
+//   })
+// })
 
 module.exports = router

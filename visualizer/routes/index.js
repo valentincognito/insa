@@ -6,9 +6,9 @@ router.get('/', async function(req, res, next) {
   let posts = await Post.find({
     user: { $exists: true },
     // tags: { $ne: [] },
-    // locationTag: { $exists: true }
+    station: { $exists: true }
   })
-  .populate('locationTag')
+  .populate('station')
   .sort({ date: -1 })
 
   res.render('index', {

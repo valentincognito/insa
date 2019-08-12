@@ -12,6 +12,8 @@ const indexRouter = require('./routes/index')
 const apiRouter = require('./routes/api')
 
 const app = express()
+const server = require('http').Server(app)
+const io = require('socket.io')(server)
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'))
@@ -22,6 +24,10 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
+app.use(function(req, res, next){
+  res.io = io
+  next()
+})
 
 app.use('/', indexRouter)
 app.use('/api', apiRouter)
@@ -49,4 +55,4 @@ mongoose.connect('mongodb://'+process.env.DB_USER+':'+process.env.DB_PWD+'@'+pro
 })
 const db = mongoose.connection
 
-module.exports = app
+module.exports = {app:app, server:server}

@@ -10,7 +10,7 @@ const PostSchema = new mongoose.Schema({
   hashtags: [{
     name: String
   }],
-  locationTag: {type: mongoose.Schema.Types.ObjectId, ref: 'Tag'},
+  station: {type: mongoose.Schema.Types.ObjectId, ref: 'Station'},
   date: Date
 })
 
