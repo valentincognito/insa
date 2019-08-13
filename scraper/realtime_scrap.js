@@ -33,6 +33,9 @@ async function discoverNewPosts(){
   //get all subway stations info
   let getStationResponse = await api.getStations()
 
+  //create an array to keep track of the discovered posts
+  let discoveredPostsId = []
+
   const cluster = await Cluster.launch({
     concurrency: Cluster.CONCURRENCY_BROWSER,
     maxConcurrency: process.env.PUPPETEER_CONCURRENCY
@@ -82,7 +85,6 @@ async function discoverNewPosts(){
     if(process.env.LOG == '1') console.log(chalk.green(`post ${chalk.greenBright(id)} saved`))
   }
 
-  // Define a task (in this case: screenshot of page)
   await cluster.task(async ({ page, data: url }) => {
       await page.goto(url, {waitUntil: 'domcontentloaded'})
       await page.waitForSelector(SELECTOR.id)
@@ -105,9 +107,13 @@ async function discoverNewPosts(){
         let checkResponse = await api.findOnePost({postId: id})
         if (checkResponse.status == 'success') {
           if (checkResponse.post == null) {
-            //add post extracting info queue
-            if(process.env.LOG == '1') console.log(chalk.blue(`adding ${chalk.blueBright(id)} to the info extracting queue`))
-            cluster.queue(id, extractInfo)
+            //check if another queue didn't scrap that post already
+            if (discoveredPostsId.indexOf(id) == -1) {
+              //add post extracting info queue
+              if(process.env.LOG == '1') console.log(chalk.blue(`adding ${chalk.blueBright(id)} to the info extracting queue`))
+              cluster.queue(id, extractInfo)
+              discoveredPostsId.push(id)
+            }
           }
         }else{
           if(process.env.LOG == '1') console.log(chalk.red(`could not query database`))
