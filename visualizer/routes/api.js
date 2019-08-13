@@ -46,7 +46,7 @@ router.post('/add_post', function(req, res, next) {
         if (err){
           res.json({status: 'error', err: err})
         }else{
-          Post.populate(post, {path:"station"}, function(err, post) { 
+          Post.populate(post, {path:"station"}, function(err, post) {
             res.io.emit('new post', post)
           })
           res.json({status: 'success', post: post})
