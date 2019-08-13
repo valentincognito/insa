@@ -31,16 +31,11 @@ async function discoverNewPosts(){
   console.time('scraping time')
 
   //get all subway stations info
-  let getStationResponse = await api.getStations().catch((err) =>{
-    if (err) {
-      console.log(`the API server seems to be offline`)
-      discoverNewPosts()
-    }
-  })
+  let getStationResponse = await api.getStations()
 
   const cluster = await Cluster.launch({
-    concurrency: Cluster.CONCURRENCY_CONTEXT,
-    maxConcurrency: process.env.PUPPETEER_CONCURRENCY,
+    concurrency: Cluster.CONCURRENCY_BROWSER,
+    maxConcurrency: process.env.PUPPETEER_CONCURRENCY
   })
 
   const extractInfo = async ({ page, data: id }) => {
