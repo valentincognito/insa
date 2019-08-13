@@ -40,7 +40,7 @@ async function discoverNewPosts(){
 
   const cluster = await Cluster.launch({
     concurrency: Cluster.CONCURRENCY_CONTEXT,
-    maxConcurrency: 10,
+    maxConcurrency: process.env.PUPPETEER_CONCURRENCY,
   })
 
   const extractInfo = async ({ page, data: id }) => {
