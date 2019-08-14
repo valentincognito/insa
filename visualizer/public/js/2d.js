@@ -1,19 +1,36 @@
+const options = {
+  lat: 37.5,
+  lng: 127,
+  zoom: 12,
+  style: 'https://api.mapbox.com/styles/v1/vvannay/cjzawf4mg0p6m1cn3vw0m11s0/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoidnZhbm5heSIsImEiOiJjanphd2RhMnYwMDkxM2lvMm53eHg3cTFsIn0.dcA_ANFWwXRqIfVRqaIjZg'
+}
+
+// Create an instance of Leaflet
+const mappa = new Mappa('Leaflet')
+let myMap
+
+let canvas
+
+let seoulMinLat = 36.769502
+let seoulMaxLat = 37.9481
+let seoulMinLong = 126.452508
+let seoulMaxLong = 127.723792
+
+let canvasWidth = 2560
+let canvasHeight = 1440
+
+let stationsFetchResponse
+let stations
+let postsFetchResponse
+
 async function setup() {
-  let seoulMinLat = 36.769502
-  let seoulMaxLat = 37.9481
-  let seoulMinLong = 126.452508
-  let seoulMaxLong = 127.723792
+  canvas = createCanvas(canvasWidth, canvasHeight)
+  myMap = mappa.tileMap(options) // lat 0, lng 0, zoom 4
+  myMap.overlay(canvas)
 
-  let canvasWidth = 1920
-  let canvasHeight = 1200
-
-  createCanvas(canvasWidth, canvasHeight)
-  background(255)
-
-  let stationsFetchResponse = await fetchStations()
-  let stations = stationsFetchResponse.stations
-
-  let postsFetchResponse = await fetchPosts()
+  stationsFetchResponse = await fetchStations()
+  stations = stationsFetchResponse.stations
+  postsFetchResponse = await fetchPosts()
 
   for (post of postsFetchResponse.posts) {
     let item = stations.find(function (obj) {return obj._id === post.station})
@@ -24,29 +41,34 @@ async function setup() {
     }
   }
 
+  myMap.onChange(drawStations)
+}
+
+function draw() {}
+
+function drawStations(){
+  //clear the canvas
+  clear()
+
   for (station of stations) {
-    if (station.lat != "0" || station.long != "0") {
+    if (station.lat != "0" && station.long != "0" && station.postCount > 20) {
       let lat = Number(station.lat)
-      let latPercent = (lat - seoulMinLat) / (seoulMaxLat - seoulMinLat)
-      let xPos = canvasWidth * latPercent
-
       let long = Number(station.long)
-      let longPercent = (long - seoulMinLong) / (seoulMaxLong - seoulMinLong)
-      let yPos = canvasHeight * longPercent
 
-      ellipse(xPos, yPos, 4,  4)
+      const pos = myMap.latLngToPixel(lat, long)
+      fill(255, 255 - station.postCount, 255 - station.postCount)
+      ellipse(pos.x, pos.y, 10,  10)
 
-      fill(255 - station.postCount)
-      textSize(station.postCount * 0.5)
-      text(station.name, xPos, yPos)
+      //fill(220 - station.postCount)
+      // textSize(station.postCount * 0.2)
+
+
+      // textSize(10)
+      // text(station.postCount, pos.x + 10, pos.y)
+      // fill(0, 0, 0)
     }
   }
-  point(1270, 710)
 }
-
-function draw() {
-}
-
 
 async function fetchStations(){
   let response = await fetch('http://localhost:3535/api/get_stations')
