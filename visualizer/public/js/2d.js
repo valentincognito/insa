@@ -4,17 +4,14 @@ const options = {
   zoom: 12,
   style: 'https://api.mapbox.com/styles/v1/vvannay/cjzawf4mg0p6m1cn3vw0m11s0/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoidnZhbm5heSIsImEiOiJjanphd2RhMnYwMDkxM2lvMm53eHg3cTFsIn0.dcA_ANFWwXRqIfVRqaIjZg'
 }
+//mapbox://styles/vvannay/cjzb1im7m0tnd1cqwelxv1ani
+//mapbox://styles/vvannay/cjzawf4mg0p6m1cn3vw0m11s0
 
 // Create an instance of Leaflet
 const mappa = new Mappa('Leaflet')
-let myMap
+let worldMap
 
 let canvas
-
-let seoulMinLat = 36.769502
-let seoulMaxLat = 37.9481
-let seoulMinLong = 126.452508
-let seoulMaxLong = 127.723792
 
 let canvasWidth = 2560
 let canvasHeight = 1440
@@ -22,26 +19,29 @@ let canvasHeight = 1440
 let stationsFetchResponse
 let stations
 let postsFetchResponse
+let totalPostCount = 0
 
 async function setup() {
   canvas = createCanvas(canvasWidth, canvasHeight)
-  myMap = mappa.tileMap(options) // lat 0, lng 0, zoom 4
-  myMap.overlay(canvas)
+  worldMap = mappa.tileMap(options)
+  worldMap.overlay(canvas)
 
   stationsFetchResponse = await fetchStations()
   stations = stationsFetchResponse.stations
   postsFetchResponse = await fetchPosts()
 
-  for (post of postsFetchResponse.posts) {
-    let item = stations.find(function (obj) {return obj._id === post.station})
-    if (item.postCount == undefined) {
-      item.postCount = 1
-    }else{
-      item.postCount++
-    }
-  }
+  //console.log(postsFetchResponse)
 
-  myMap.onChange(drawStations)
+  // for (post of postsFetchResponse.posts) {
+  //   let item = stations.find(function (obj) {return obj._id === post.station})
+  //   if (item.postCount == undefined) {
+  //     item.postCount = 1
+  //   }else{
+  //     item.postCount++
+  //   }
+  // }
+
+  worldMap.onChange(drawStations)
 }
 
 function draw() {}
@@ -55,23 +55,27 @@ function drawStations(){
       let lat = Number(station.lat)
       let long = Number(station.long)
 
-      const pos = myMap.latLngToPixel(lat, long)
-      fill(255, 255 - station.postCount, 255 - station.postCount)
-      ellipse(pos.x, pos.y, 10,  10)
+      const pos = worldMap.latLngToPixel(lat, long)
+      let normalizedCount = normalize(station.postCount, totalPostCount, 0)
 
-      //fill(220 - station.postCount)
-      // textSize(station.postCount * 0.2)
+      noStroke()
+      fill(255 * normalizedCount, 150)
 
+      let ellipseSizeOffset = (normalizedCount > 0.02) ? 300 : 2500
+      let diameter = (normalizedCount * ellipseSizeOffset)
+      ellipse(pos.x, pos.y, diameter,  diameter)
 
-      // textSize(10)
-      // text(station.postCount, pos.x + 10, pos.y)
-      // fill(0, 0, 0)
+      textSize(10)
+      textFont('Consolas');
+      textAlign(CENTER, CENTER)
+      fill(255)
+      text(station.postCount, pos.x, pos.y)
     }
   }
 }
 
 async function fetchStations(){
-  let response = await fetch('http://localhost:3535/api/get_stations')
+  let response = await fetch('/api/get_stations')
 
   if (response.status !== 200) {
     console.log('looks like there was a problem. status code: ' + response.status);
@@ -80,16 +84,85 @@ async function fetchStations(){
   return await response.json()
 }
 
+// async function fetchPosts(){
+//   let response = await fetch('/api/get_posts', {
+//     method: 'post',
+//     body: JSON.stringify({params: {station: { $exists: true }}}),
+//     headers: { 'Content-type': 'application/json' }
+//   })
+//
+//   if (response.status !== 200) {
+//     console.log('looks like there was a problem. status code: ' + response.status);
+//     return
+//   }
+//   return await response.json()
+// }
+
 async function fetchPosts(){
-  let response = await fetch('http://localhost:3535/api/get_posts', {
+  let response = await fetch('/api/lazy_load_posts', {
     method: 'post',
     body: JSON.stringify({params: {station: { $exists: true }}}),
     headers: { 'Content-type': 'application/json' }
-  })
+  }).then((response) => {
+    const reader = response.body.getReader()
+    const stream = new ReadableStream({
+      start(controller) {
+        let partialChunk = ""
 
-  if (response.status !== 200) {
-    console.log('looks like there was a problem. status code: ' + response.status);
-    return
-  }
-  return await response.json()
+        function push() {
+          reader.read().then(({ done, value }) => {
+            if (done) {
+              controller.close()
+              return
+            }
+
+            let chunkOfPosts = new TextDecoder("utf-8").decode(value)
+            chunkOfPosts = chunkOfPosts.replace(/}{/gm, "},{")
+
+            let jsonChunk
+
+
+            try {
+              jsonChunk = JSON.parse("["+chunkOfPosts+"]")
+            } catch (e) {
+              partialChunk += chunkOfPosts
+              console.log(`partial chunk added`)
+            }
+
+            if (partialChunk != "") {
+              try {
+                jsonChunk = JSON.parse("["+partialChunk+"]")
+                partialChunk = ""
+                console.log(`partial chunck treated`)
+              } catch (e) {
+                console.log(`partial chunck not complete yet`)
+              }
+            }
+
+            if (jsonChunk != undefined) {
+              for (chunk of jsonChunk) {
+                let item = stations.find(function (obj) {return obj._id === chunk.station})
+                if (item.postCount == undefined) {
+                  item.postCount = 1
+                }else{
+                  item.postCount++
+                }
+
+                totalPostCount++
+              }
+              drawStations()
+            }
+
+            controller.enqueue(value)
+            push()
+          })
+        }
+        push()
+      }
+    })
+
+    return new Response(stream, { headers: { "Content-Type": "text/json" } })
+  })
 }
+
+function normalize(val, max, min) { return (val - min) / (max - min) }

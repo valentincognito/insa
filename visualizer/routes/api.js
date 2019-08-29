@@ -19,7 +19,24 @@ router.post('/get_posts', function(req, res, next) {
       res.json({status: 'error', err: err})
     else
       res.json({status: 'success', posts: posts})
-  })
+  }).lean()
+})
+
+router.post('/lazy_load_posts', function(req, res, next) {
+  let cursor = Post.find(req.body.params, 'station')
+  .lean()
+  .cursor({transform: JSON.stringify})
+  .pipe(res.type('json'))
+
+  // cursor.on('data', function(post) {
+  //   // Called once for every document
+  //   console.log(post)
+  //   res.write(post)
+  // })
+  // cursor.on('close', function() {
+  //   // Called when done
+  // })
+
 })
 
 router.post('/add_post', function(req, res, next) {
