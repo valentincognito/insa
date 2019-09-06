@@ -4,6 +4,10 @@ const Post = require('../models/post')
 const Tag = require('../models/tag')
 const Station = require('../models/station')
 
+router.post('/mapbox_token', function(req, res, next) {
+  res.json(process.env.MAPBOX_TOKEN)
+})
+
 router.post('/get_post', function(req, res, next) {
   Post.findOne(req.body.params, function(err, post){
     if (err)
@@ -27,16 +31,6 @@ router.post('/lazy_load_posts', function(req, res, next) {
   .lean()
   .cursor({transform: JSON.stringify})
   .pipe(res.type('json'))
-
-  // cursor.on('data', function(post) {
-  //   // Called once for every document
-  //   console.log(post)
-  //   res.write(post)
-  // })
-  // cursor.on('close', function() {
-  //   // Called when done
-  // })
-
 })
 
 router.post('/add_post', function(req, res, next) {

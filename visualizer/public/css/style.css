@@ -44,3 +44,11 @@ a:hover{outline: 0;text-decoration: none;color: inherit;}
 .posts-list th{
   text-align: left;
 }
+
+/** 2d map styles **/
+.map-ui{
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: 20;
+}
