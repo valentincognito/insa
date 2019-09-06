@@ -1,0 +1,8 @@
+extends layout
+
+block content
+  link(href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.3.0/mapbox-gl.css' rel='stylesheet')
+  div#map
+block scripts
+  script(src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.3.0/mapbox-gl.js')
+  script(src='/js/mapbox.js')
