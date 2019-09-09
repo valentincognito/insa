@@ -12,7 +12,10 @@ let stations
   console.log(stationsFetchResponse)
 
   map.on('load', function() {
-    let polygonCoordinates = []
+    let stationGeoJson = {
+      "features": [],
+      "type": "FeatureCollection"
+    }
 
     for (station of stations) {
       if (station.lat != "0" && station.long != "0") {
@@ -20,25 +23,33 @@ let stations
         let long = Number(station.long)
 
         let polygon = createPolygonFromCoordinate([long, lat], 0.002, 100)
-        polygonCoordinates.push(polygon)
+        stationGeoJson.features.push({
+          "type": "Feature",
+          "properties": {
+            "level": 1,
+            "name": station.name,
+            "height": 20,
+            "base_height": 0,
+            "color": "orange"
+          },
+          "geometry": {
+            "coordinates": [polygon],
+            "type": "Polygon"
+          },
+          "id": station._id
+        })
       }
     }
 
-    console.log(polygonCoordinates)
+    console.log(stationGeoJson)
 
-    map.addSource('point', {
+    map.addSource('stations', {
       "type": "geojson",
-      "data": {
-        "type": "Feature",
-        "geometry": {
-          "type": "Polygon",
-          "coordinates": polygonCoordinates
-        }
-      }
+      "data": stationGeoJson
     })
     map.addLayer({
-      "id": "point",
-      "source": "point",
+      "id": "stations",
+      "source": "stations",
       "type": "fill-extrusion",
       "paint": {
         "fill-extrusion-color": "orange",
