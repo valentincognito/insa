@@ -2,6 +2,8 @@
 let map
 let stationsFetchResponse
 let stations
+let totalPostCount
+let stationGeoJson
 
 (async function () {
   await initMap()
@@ -9,10 +11,11 @@ let stations
   stationsFetchResponse = await fetchStations()
   stations = stationsFetchResponse.stations
 
-  console.log(stationsFetchResponse)
-
   map.on('load', function() {
-    let stationGeoJson = {
+    totalPostCount = 0
+    fetchPosts()
+
+    stationGeoJson = {
       "features": [],
       "type": "FeatureCollection"
     }
@@ -28,7 +31,7 @@ let stations
           "properties": {
             "level": 1,
             "name": station.name,
-            "height": 20,
+            "height": 0,
             "base_height": 0,
             "color": "orange"
           },
@@ -52,9 +55,9 @@ let stations
       "source": "stations",
       "type": "fill-extrusion",
       "paint": {
-        "fill-extrusion-color": "orange",
-        "fill-extrusion-height": 500,
-        "fill-extrusion-base": 0,
+        "fill-extrusion-color": ['get', 'color'],
+        "fill-extrusion-height": ['get', 'height'],
+        "fill-extrusion-base": ['get', 'base_height'],
         "fill-extrusion-opacity": 0.5
       }
     })
@@ -106,4 +109,60 @@ async function fetchStations(){
     return
   }
   return await response.json()
+}
+
+async function fetchPosts(){
+  let response = await fetch('/api/lazy_load_posts', {
+    method: 'post',
+    body: JSON.stringify({params: {station: { $exists: true }}}),
+    headers: { 'Content-type': 'application/json' }
+  }).then((response) => {
+    const reader = response.body.getReader()
+    const stream = new ReadableStream({
+      start(controller) {
+        let partialChunk = ""
+
+        function push() {
+          reader.read().then(({ done, value }) => {
+            if (done) {
+              controller.close()
+              return
+            }
+
+            let chunkOfPosts = new TextDecoder("utf-8").decode(value)
+            chunkOfPosts = chunkOfPosts.replace(/}{/gm, "},{")
+
+            let jsonChunk
+
+            try {
+              jsonChunk = JSON.parse("["+chunkOfPosts+"]")
+            } catch (e) {
+              partialChunk += chunkOfPosts
+            }
+
+            if (partialChunk != "") {
+              try {
+                jsonChunk = JSON.parse("["+partialChunk+"]")
+                partialChunk = ""
+              } catch (e) {
+              }
+            }
+
+            if (jsonChunk != undefined) {
+              for (chunk of jsonChunk) {
+                let item = stationGeoJson.features.find(function (obj) {return obj.id === chunk.station})
+                item.properties.height++
+                totalPostCount++
+              }
+              map.getSource('stations').setData(stationGeoJson)
+            }
+            controller.enqueue(value)
+            push()
+          })
+        }
+        push()
+      }
+    })
+    return new Response(stream, { headers: { "Content-Type": "text/json" } })
+  })
 }
