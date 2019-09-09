@@ -15,6 +15,8 @@ let stationGeoJson
     totalPostCount = 0
     fetchPosts()
 
+    rotateCamera(0)
+
     stationGeoJson = {
       "features": [],
       "type": "FeatureCollection"
@@ -25,7 +27,7 @@ let stationGeoJson
         let lat = Number(station.lat)
         let long = Number(station.long)
 
-        let polygon = createPolygonFromCoordinate([long, lat], 0.002, 100)
+        let polygon = createPolygonFromCoordinate([long, lat], 0.002, 200)
         stationGeoJson.features.push({
           "type": "Feature",
           "properties": {
@@ -33,7 +35,7 @@ let stationGeoJson
             "name": station.name,
             "height": 0,
             "base_height": 0,
-            "color": "orange"
+            "color": "#e89608"
           },
           "geometry": {
             "coordinates": [polygon],
@@ -58,7 +60,7 @@ let stationGeoJson
         "fill-extrusion-color": ['get', 'color'],
         "fill-extrusion-height": ['get', 'height'],
         "fill-extrusion-base": ['get', 'base_height'],
-        "fill-extrusion-opacity": 0.5
+        "fill-extrusion-opacity": 0.8
       }
     })
   })
@@ -77,11 +79,21 @@ async function initMap() {
   map = new mapboxgl.Map({
     container: 'map',
     center: [127, 37.5],
-    zoom: 12,
+    zoom: 11,
     pitch: 55,
     antialias: true,
-    style: 'mapbox://styles/vvannay/cjzb1im7m0tnd1cqwelxv1ani'
+    style: 'mapbox://styles/vvannay/ck0c2grxx4il01cqwlw5alwgx'
   })
+}
+
+//style: 'mapbox://styles/vvannay/cjzb1im7m0tnd1cqwelxv1ani'
+//style: 'mapbox://styles/vvannay/cjzawf4mg0p6m1cn3vw0m11s0'
+//mapbox://styles/vvannay/ck0c2grxx4il01cqwlw5alwgx
+
+function rotateCamera(timestamp) {
+  //divide timestamp by 100 to slow rotation to ~10 degrees / sec
+  map.rotateTo((timestamp / 200) % 360, {duration: 0})
+  requestAnimationFrame(rotateCamera)
 }
 
 function createPolygonFromCoordinate(location, size, faces){
